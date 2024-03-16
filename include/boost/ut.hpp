@@ -1325,16 +1325,10 @@ namespace type_traits {
 template <class T>
 inline constexpr auto is_op_v = __is_base_of(detail::op, T);
 
-template <typename T, typename = void>
-struct is_stream_insertable : std::false_type {};
-
-template <typename T>
-struct is_stream_insertable<
-    T, std::void_t<decltype(std::declval<std::ostream&>()
-                            << detail::get(std::declval<T>()))>>
-    : std::true_type {};
-template <typename T>
-inline constexpr bool is_stream_insertable_v = is_stream_insertable<T>::value;
+template<typename T>
+concept stream_insertable = requires(T t, std::ostream& os) {
+  { os << detail::get(t) };
+};
 }  // namespace type_traits
 
 struct colors {
@@ -3060,53 +3054,32 @@ struct suite {
 template <class T = void>
 [[maybe_unused]] constexpr auto type = detail::type_<T>();
 
-template <class TLhs, class TRhs,
-          typename = type_traits::requires_t<
-              type_traits::is_stream_insertable_v<TLhs> and
-              type_traits::is_stream_insertable_v<TRhs>>>
+template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto eq(const TLhs& lhs, const TRhs& rhs) {
   return detail::eq_{lhs, rhs};
 }
-template <class TLhs, class TRhs, class TEpsilon,
-          typename = type_traits::requires_t<
-              type_traits::is_stream_insertable_v<TLhs> and
-              type_traits::is_stream_insertable_v<TRhs>>>
+template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs, class TEpsilon>
 [[nodiscard]] constexpr auto approx(const TLhs& lhs, const TRhs& rhs,
                                     const TEpsilon& epsilon) {
   return detail::approx_{lhs, rhs, epsilon};
 }
-template <class TLhs, class TRhs,
-          typename = type_traits::requires_t<
-              type_traits::is_stream_insertable_v<TLhs> and
-              type_traits::is_stream_insertable_v<TRhs>>>
+template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto neq(const TLhs& lhs, const TRhs& rhs) {
   return detail::neq_{lhs, rhs};
 }
-template <class TLhs, class TRhs,
-          typename = type_traits::requires_t<
-              type_traits::is_stream_insertable_v<TLhs> and
-              type_traits::is_stream_insertable_v<TRhs>>>
+template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto gt(const TLhs& lhs, const TRhs& rhs) {
   return detail::gt_{lhs, rhs};
 }
-template <class TLhs, class TRhs,
-          typename = type_traits::requires_t<
-              type_traits::is_stream_insertable_v<TLhs> and
-              type_traits::is_stream_insertable_v<TRhs>>>
+template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto ge(const TLhs& lhs, const TRhs& rhs) {
   return detail::ge_{lhs, rhs};
 }
-template <class TLhs, class TRhs,
-          typename = type_traits::requires_t<
-              type_traits::is_stream_insertable_v<TLhs> and
-              type_traits::is_stream_insertable_v<TRhs>>>
+template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto lt(const TLhs& lhs, const TRhs& rhs) {
   return detail::lt_{lhs, rhs};
 }
-template <class TLhs, class TRhs,
-          typename = type_traits::requires_t<
-              type_traits::is_stream_insertable_v<TLhs> and
-              type_traits::is_stream_insertable_v<TRhs>>>
+template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto le(const TLhs& lhs, const TRhs& rhs) {
   return detail::le_{lhs, rhs};
 }
