@@ -1091,8 +1091,11 @@ struct neq_ : op {
           } else if constexpr (type_traits::has_static_member_object_epsilon_v<
                                    TRhs>) {
             return math::abs(get(lhs_) - get(rhs_)) > TRhs::epsilon;
+          } else if constexpr (!std::same_as<TLhs, bool> &&
+                               std::integral<TLhs> && std::integral<TRhs>) {
+            return std::cmp_not_equal(get(lhs), get(rhs));
           } else {
-            return get(lhs_) != get(rhs_);
+            return get(lhs) != get(rhs);
           }
         }()} {}
 
@@ -1114,8 +1117,11 @@ struct gt_ : op {
           if constexpr (type_traits::has_static_member_object_value_v<TLhs> and
                         type_traits::has_static_member_object_value_v<TRhs>) {
             return TLhs::value > TRhs::value;
+          } else if constexpr (!std::same_as<TLhs, bool> &&
+                               std::integral<TLhs> && std::integral<TRhs>) {
+            return std::cmp_greater(get(lhs), get(rhs));
           } else {
-            return get(lhs_) > get(rhs_);
+            return get(lhs) > get(rhs);
           }
         }()} {}
 
@@ -1137,8 +1143,11 @@ struct ge_ : op {
           if constexpr (type_traits::has_static_member_object_value_v<TLhs> and
                         type_traits::has_static_member_object_value_v<TRhs>) {
             return TLhs::value >= TRhs::value;
+          } else if constexpr (!std::same_as<TLhs, bool> &&
+                               std::integral<TLhs> && std::integral<TRhs>) {
+            return std::cmp_greater_equal(get(lhs), get(rhs));
           } else {
-            return get(lhs_) >= get(rhs_);
+            return get(lhs) >= get(rhs);
           }
         }()} {}
 
@@ -1160,8 +1169,11 @@ struct lt_ : op {
           if constexpr (type_traits::has_static_member_object_value_v<TLhs> and
                         type_traits::has_static_member_object_value_v<TRhs>) {
             return TLhs::value < TRhs::value;
+          } else if constexpr (!std::same_as<TLhs, bool> &&
+                               std::integral<TLhs> && std::integral<TRhs>) {
+            return std::cmp_less(get(lhs), get(rhs));
           } else {
-            return get(lhs_) < get(rhs_);
+            return get(lhs) < get(rhs);
           }
         }()} {}
 
@@ -1184,8 +1196,11 @@ struct le_ : op {
           if constexpr (type_traits::has_static_member_object_value_v<TLhs> and
                         type_traits::has_static_member_object_value_v<TRhs>) {
             return TLhs::value <= TRhs::value;
+          } else if constexpr (!std::same_as<TLhs, bool> &&
+                               std::integral<TLhs> && std::integral<TRhs>) {
+            return std::cmp_less_equal(get(lhs), get(rhs));
           } else {
-            return get(lhs_) <= get(rhs_);
+            return get(lhs) <= get(rhs);
           }
         }()} {}
 

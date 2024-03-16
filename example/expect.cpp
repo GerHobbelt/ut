@@ -43,8 +43,8 @@ int main() {
   "eq/neq/gt/ge/lt/le"_test = [] {
     // type_traits::is_stream_insertable_v constraint check
     
-    static_assert( type_traits::is_stream_insertable_v<int>);
-    static_assert( !type_traits::is_stream_insertable_v<dummy_struct>);
+    static_assert( type_traits::stream_insertable<int>);
+    static_assert( !type_traits::stream_insertable<dummy_struct>);
 
     // it seems it produces nice error information
     // leaving this as easy way to check failing compilation in case of doubt
