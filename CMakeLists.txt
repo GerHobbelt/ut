@@ -50,7 +50,7 @@ endif()
 
 add_library(ut INTERFACE)
 
-if(BOOST_UT_ALLOW_CPM_USE)
+if(BOOST_UT_ALLOW_CPM_USE AND PROJECT_IS_TOP_LEVEL)
 add_library(Boost::ut ALIAS ut)
 endif()
 
