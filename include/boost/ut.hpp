@@ -20,10 +20,10 @@ export import std;
 
 #include <version>
 #if defined(_MSC_VER)
-  #pragma push_macro("min")
-  #pragma push_macro("max")
-  #undef min
-  #undef max
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
 #endif
 // Before libc++ 17 had experimental support for format and it required a
 // special build flag. Currently libc++ has not implemented all C++20 chrono
@@ -76,6 +76,7 @@ export import std;
 #include <chrono>
 #include <concepts>
 #include <cstdint>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -88,7 +89,6 @@ export import std;
 #include <utility>
 #include <variant>
 #include <vector>
-#include <fstream>
 #if __has_include(<unistd.h>) and __has_include(<sys/wait.h>)
 #include <sys/wait.h>
 #include <unistd.h>
@@ -161,9 +161,9 @@ class function<R(TArgs...)> {
     return std::empty(input);
   }
 
-  if (std::empty(input)) {
+  if (std::empty(input)) 
     return pattern[0] == '*' ? is_match(input, pattern.substr(1)) : false;
-  }
+  
 
   if (pattern[0] != '?' and pattern[0] != '*' and pattern[0] != input[0]) {
     return false;
@@ -182,8 +182,8 @@ class function<R(TArgs...)> {
 }
 
 template <class TPattern, class TStr>
-[[nodiscard]] constexpr auto match(const TPattern& pattern, const TStr& str)
-    -> std::vector<TStr> {
+[[nodiscard]] constexpr auto match(const TPattern& pattern,
+                                   const TStr& str) -> std::vector<TStr> {
   std::vector<TStr> groups{};
   auto pi = 0u;
   auto si = 0u;
@@ -236,15 +236,15 @@ template <class T = std::string_view, class TDelim>
   }
   return output;
 }
-constexpr auto regex_match(const char *str, const char *pattern) -> bool {
+constexpr auto regex_match(const char* str, const char* pattern) -> bool {
   if (*pattern == '\0' && *str == '\0') return true;
   if (*pattern == '\0' && *str != '\0') return false;
   if (*str == '\0' && *pattern != '\0') return false;
   if (*pattern == '.') {
-    return regex_match(str+1, pattern+1);
+    return regex_match(str + 1, pattern + 1);
   }
   if (*pattern == *str) {
-    return regex_match(str+1, pattern+1);
+    return regex_match(str + 1, pattern + 1);
   }
   return false;
 }
@@ -352,8 +352,9 @@ template <class T>
 }
 
 template <class T, class U>
-[[nodiscard]] constexpr auto abs_diff(const T t, const U u)
-    -> decltype(t < u ? u - t : t - u) {
+[[nodiscard]] constexpr auto abs_diff(const T t,
+                                      const U u) -> decltype(t < u ? u - t
+                                                                   : t - u) {
   return t < u ? u - t : t - u;
 }
 
@@ -462,8 +463,8 @@ struct function_traits<R (T::*)(TArgs...) const> {
 template <class T>
 T&& declval();
 template <class... Ts, class TExpr>
-constexpr auto is_valid(TExpr expr)
-    -> decltype(expr(declval<Ts...>()), bool()) {
+constexpr auto is_valid(TExpr expr) -> decltype(expr(declval<Ts...>()),
+                                                bool()) {
   return true;
 }
 template <class...>
@@ -596,7 +597,7 @@ struct suite_end {
 template <class Test, class TArg = none>
 struct test {
   std::string_view type{};
-  std::string name{}; /// might be dynamic
+  std::string name{};  /// might be dynamic
   std::vector<std::string_view> tag{};
   reflection::source_location location{};
   TArg arg{};
@@ -609,8 +610,8 @@ struct test {
   static constexpr auto run_impl(Test test, const none&) { test(); }
 
   template <class T>
-  static constexpr auto run_impl(T test, const TArg& arg)
-      -> decltype(test(arg), void()) {
+  static constexpr auto run_impl(T test, const TArg& arg) -> decltype(test(arg),
+                                                                      void()) {
     test(arg);
   }
 
@@ -1026,6 +1027,9 @@ struct eq_ : op {
           } else if constexpr (type_traits::has_static_member_object_epsilon_v<
                                    TRhs>) {
             return math::abs(get(lhs) - get(rhs)) < TRhs::epsilon;
+          } else if constexpr (!std::same_as<TLhs, bool> &&
+                               std::integral<TLhs> && std::integral<TRhs>) {
+            return std::cmp_equal(get(lhs), get(rhs));
           } else {
             return get(lhs) == get(rhs);
           }
@@ -1098,7 +1102,7 @@ struct neq_ : op {
             return get(lhs) != get(rhs);
           }
         }()} {}
-
+    
   [[nodiscard]] constexpr operator bool() const { return value_; }
   [[nodiscard]] constexpr auto lhs() const { return get(lhs_); }
   [[nodiscard]] constexpr auto rhs() const { return get(rhs_); }
@@ -1340,7 +1344,7 @@ namespace type_traits {
 template <class T>
 inline constexpr auto is_op_v = __is_base_of(detail::op, T);
 
-template<typename T>
+template <typename T>
 concept stream_insertable = requires(T t, std::ostream& os) {
   { os << detail::get(t) };
 };
@@ -1565,9 +1569,8 @@ class reporter {
                << printer_.colors().fail << tests_.fail << " failed"
                << printer_.colors().none << '\n'
                << "asserts: " << (asserts_.pass + asserts_.fail) << " | "
-               << asserts_.pass << " passed"
-               << " | " << printer_.colors().fail << asserts_.fail << " failed"
-               << printer_.colors().none << '\n';
+               << asserts_.pass << " passed" << " | " << printer_.colors().fail
+               << asserts_.fail << " failed" << printer_.colors().none << '\n';
       std::cerr << printer_.str() << std::endl;
     } else {
       std::cout << printer_.colors().pass << "All tests passed"
@@ -1867,16 +1870,18 @@ class reporter_junit {
     std::cout.flush();
     std::cout.rdbuf(cout_save);
     std::ofstream maybe_of;
-    if (detail::cfg::output_filename != "") { maybe_of = std::ofstream(detail::cfg::output_filename); }
+    if (detail::cfg::output_filename != "") {
+      maybe_of = std::ofstream(detail::cfg::output_filename);
+    }
 
     if (report_type_ == JUNIT) {
-      print_junit_summary(detail::cfg::output_filename != "" ? maybe_of : std::cout);
+      print_junit_summary(detail::cfg::output_filename != "" ? maybe_of
+                                                             : std::cout);
       return;
     }
     print_console_summary(
-      detail::cfg::output_filename != "" ? maybe_of : std::cout,
-      detail::cfg::output_filename != "" ? maybe_of : std::cerr
-    );
+        detail::cfg::output_filename != "" ? maybe_of : std::cout,
+        detail::cfg::output_filename != "" ? maybe_of : std::cerr);
   }
 
  protected:
@@ -1892,7 +1897,8 @@ class reporter_junit {
     }
   }
 
-  void print_console_summary(std::ostream &out_stream, std::ostream &err_stream) {
+  void print_console_summary(std::ostream& out_stream,
+                             std::ostream& err_stream) {
     for (const auto& [suite_name, suite_result] : results_) {
       if (suite_result.fails) {
         err_stream
@@ -1902,15 +1908,14 @@ class reporter_junit {
             << "tests:   " << (suite_result.n_tests) << " | " << color_.fail
             << suite_result.fails << " failed" << color_.none << '\n'
             << "asserts: " << (suite_result.assertions) << " | "
-            << suite_result.passed << " passed"
-            << " | " << color_.fail << suite_result.fails << " failed"
-            << color_.none << '\n';
+            << suite_result.passed << " passed" << " | " << color_.fail
+            << suite_result.fails << " failed" << color_.none << '\n';
         std::cerr << std::endl;
       } else {
         out_stream << color_.pass << "Suite '" << suite_name
-                  << "': all tests passed" << color_.none << " ("
-                  << suite_result.assertions << " asserts in "
-                  << suite_result.n_tests << " tests)\n";
+                   << "': all tests passed" << color_.none << " ("
+                   << suite_result.assertions << " asserts in "
+                   << suite_result.n_tests << " tests)\n";
 
         if (suite_result.skipped) {
           std::cout << suite_result.skipped << " tests skipped\n";
@@ -1921,9 +1926,9 @@ class reporter_junit {
     }
   }
 
-  void print_junit_summary(std::ostream &stream) {
+  void print_junit_summary(std::ostream& stream) {
     // aggregate results
-    size_t n_tests=0, n_fails=0;
+    size_t n_tests = 0, n_fails = 0;
     double total_time = 0.0;
     auto suite_time = [](auto const& suite_result) {
       std::int64_t time_ms =
@@ -1941,11 +1946,11 @@ class reporter_junit {
     // mock junit output:
     stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     stream << "<testsuites";
-      stream << " name=\"all\"";
-      stream << " tests=\"" << n_tests << '\"';
-      stream << " failures=\"" << n_fails << '\"';
-      stream << " time=\"" << total_time << '\"';
-      stream << ">\n";
+    stream << " name=\"all\"";
+    stream << " tests=\"" << n_tests << '\"';
+    stream << " failures=\"" << n_fails << '\"';
+    stream << " time=\"" << total_time << '\"';
+    stream << ">\n";
 
     for (const auto& [suite_name, suite_result] : results_) {
       stream << "<testsuite";
@@ -1963,8 +1968,8 @@ class reporter_junit {
     }
     stream << "</testsuites>";
   }
-  void print_result(std::ostream &stream, const std::string& suite_name, std::string indent,
-                    const test_result& parent) {
+  void print_result(std::ostream& stream, const std::string& suite_name,
+                    std::string indent, const test_result& parent) {
     for (const auto& [name, result] : *parent.nested_tests) {
       stream << indent;
       stream << "<testcase classname=\"" << result.suite_name << '\"';
@@ -1977,8 +1982,7 @@ class reporter_junit {
           std::chrono::duration_cast<std::chrono::milliseconds>(
               result.run_stop - result.run_start)
               .count();
-      stream << " time=\"" << (static_cast<double>(time_ms) / 1000.0)
-                << "\"";
+      stream << " time=\"" << (static_cast<double>(time_ms) / 1000.0) << "\"";
       stream << " status=\"" << result.status << '\"';
       if (result.report_string.empty() && result.nested_tests->empty()) {
         stream << " />\n";
@@ -2018,8 +2022,8 @@ class runner {
         : path_{utility::split(_filter, delim)} {}
 
     template <class TPath>
-    constexpr auto operator()(const std::size_t level, const TPath& path) const
-        -> bool {
+    constexpr auto operator()(const std::size_t level,
+                              const TPath& path) const -> bool {
       for (auto i = 0u; i < math::min_value(level + 1, std::size(path_)); ++i) {
         if (not utility::is_match(path[i], path_[i])) {
           return false;
@@ -2733,20 +2737,18 @@ template <class F, class T,
 [[nodiscard]] constexpr auto operator|(const F& f, const T& t) {
   return [f, t](const auto name) {
     for (const auto& arg : t) {
-      detail::on<F>(events::test<F, decltype(arg)>{
-              .type = "test",
-              .name = std::string{name},
-              .tag = {},
-              .location = {},
-              .arg = arg,
-              .run = f});
+      detail::on<F>(events::test<F, decltype(arg)>{.type = "test",
+                                                   .name = std::string{name},
+                                                   .tag = {},
+                                                   .location = {},
+                                                   .arg = arg,
+                                                   .run = f});
     }
   };
 }
 
-template <
-    class F, template <class...> class T, class... Ts,
-    type_traits::requires_t<not type_traits::is_range_v<T<Ts...>>> = 0>
+template <class F, template <class...> class T, class... Ts,
+          type_traits::requires_t<not type_traits::is_range_v<T<Ts...>>> = 0>
 [[nodiscard]] constexpr auto operator|(const F& f, const T<Ts...>& t) {
   return [f, t](const auto name) {
     apply(
@@ -3069,32 +3071,39 @@ struct suite {
 template <class T = void>
 [[maybe_unused]] constexpr auto type = detail::type_<T>();
 
-template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
+template <type_traits::stream_insertable TLhs,
+          type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto eq(const TLhs& lhs, const TRhs& rhs) {
   return detail::eq_{lhs, rhs};
 }
-template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs, class TEpsilon>
+template <type_traits::stream_insertable TLhs,
+          type_traits::stream_insertable TRhs, class TEpsilon>
 [[nodiscard]] constexpr auto approx(const TLhs& lhs, const TRhs& rhs,
                                     const TEpsilon& epsilon) {
   return detail::approx_{lhs, rhs, epsilon};
 }
-template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
+template <type_traits::stream_insertable TLhs,
+          type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto neq(const TLhs& lhs, const TRhs& rhs) {
   return detail::neq_{lhs, rhs};
 }
-template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
+template <type_traits::stream_insertable TLhs,
+          type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto gt(const TLhs& lhs, const TRhs& rhs) {
   return detail::gt_{lhs, rhs};
 }
-template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
+template <type_traits::stream_insertable TLhs,
+          type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto ge(const TLhs& lhs, const TRhs& rhs) {
   return detail::ge_{lhs, rhs};
 }
-template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
+template <type_traits::stream_insertable TLhs,
+          type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto lt(const TLhs& lhs, const TRhs& rhs) {
   return detail::lt_{lhs, rhs};
 }
-template <type_traits::stream_insertable TLhs, type_traits::stream_insertable TRhs>
+template <type_traits::stream_insertable TLhs,
+          type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto le(const TLhs& lhs, const TRhs& rhs) {
   return detail::le_{lhs, rhs};
 }
@@ -3299,8 +3308,8 @@ using operators::operator>>;
 
 #if (defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)) && \
     !defined(__EMSCRIPTEN__)
-__attribute__((constructor(101))) inline void cmd_line_args(int argc,
-                                                       const char* argv[]) {
+__attribute__((constructor(101))) inline void cmd_line_args(
+    int argc, const char* argv[]) {
   ::boost::ut::detail::cfg::largc = argc;
   ::boost::ut::detail::cfg::largv = argv;
 }
@@ -3309,8 +3318,8 @@ __attribute__((constructor(101))) inline void cmd_line_args(int argc,
 #endif
 
 #if defined(_MSC_VER)
-  #pragma pop_macro("min")
-  #pragma pop_macro("max")
+#pragma pop_macro("min")
+#pragma pop_macro("max")
 #endif
 
 #endif
