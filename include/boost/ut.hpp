@@ -3074,38 +3074,38 @@ template <class T = void>
 template <type_traits::stream_insertable TLhs,
           type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto eq(const TLhs& lhs, const TRhs& rhs) {
-  return detail::eq_{lhs, rhs};
+  return detail::eq_<TLhs,TRhs>{lhs, rhs};
 }
 template <type_traits::stream_insertable TLhs,
           type_traits::stream_insertable TRhs, class TEpsilon>
 [[nodiscard]] constexpr auto approx(const TLhs& lhs, const TRhs& rhs,
                                     const TEpsilon& epsilon) {
-  return detail::approx_{lhs, rhs, epsilon};
+  return detail::approx_<TLhs,TRhs,TEpsilon>{lhs, rhs, epsilon};
 }
 template <type_traits::stream_insertable TLhs,
           type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto neq(const TLhs& lhs, const TRhs& rhs) {
-  return detail::neq_{lhs, rhs};
+  return detail::neq_<TLhs,TRhs>{lhs, rhs};
 }
 template <type_traits::stream_insertable TLhs,
           type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto gt(const TLhs& lhs, const TRhs& rhs) {
-  return detail::gt_{lhs, rhs};
+  return detail::gt_<TLhs,TRhs>{lhs, rhs};
 }
 template <type_traits::stream_insertable TLhs,
           type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto ge(const TLhs& lhs, const TRhs& rhs) {
-  return detail::ge_{lhs, rhs};
+  return detail::ge_<TLhs,TRhs>{lhs, rhs};
 }
 template <type_traits::stream_insertable TLhs,
           type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto lt(const TLhs& lhs, const TRhs& rhs) {
-  return detail::lt_{lhs, rhs};
+  return detail::lt_<TLhs,TRhs>{lhs, rhs};
 }
 template <type_traits::stream_insertable TLhs,
           type_traits::stream_insertable TRhs>
 [[nodiscard]] constexpr auto le(const TLhs& lhs, const TRhs& rhs) {
-  return detail::le_{lhs, rhs};
+  return detail::le_<TLhs,TRhs>{lhs, rhs};
 }
 
 template <class T>
