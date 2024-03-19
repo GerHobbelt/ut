@@ -704,192 +704,58 @@ struct fatal {
     return detail::fatal_{t};
   }
 };
+
 struct cfg {
   using value_ref = std::variant<std::monostate, std::reference_wrapper<bool>,
                                  std::reference_wrapper<std::size_t>,
                                  std::reference_wrapper<std::string>>;
   using option = std::tuple<std::string, std::string, value_ref, std::string>;
-  static inline reflection::source_location location{};
-  static inline bool wip{};
+  static reflection::source_location location;
+  static bool wip;
 
-#if defined(_MSC_VER)
-  static inline int largc = __argc;
-  static inline const char** largv = const_cast<const char**>(__argv);
-#else
-  static inline int largc = 0;
-  static inline const char** largv = nullptr;
-#endif
 
-  static inline std::string executable_name = "unknown executable";
-  static inline std::string query_pattern = "";        // <- done
-  static inline bool invert_query_pattern = false;     // <- done
-  static inline std::string query_regex_pattern = "";  // <- done
-  static inline bool show_help = false;                // <- done
-  static inline bool show_tests = false;               // <- done
-  static inline bool list_tags = false;                // <- done
-  static inline bool show_successful_tests = false;    // <- done
-  static inline std::string output_filename = "";
-  static inline std::string use_reporter = "console";  // <- done
-  static inline std::string suite_name = "";
-  static inline bool abort_early = false;  // <- done
-  static inline std::size_t abort_after_n_failures =
+static int largc;
+ static const char** largv;
+
+
+  std::string executable_name = "unknown executable";
+  std::string query_pattern = "";        // <- done
+  bool invert_query_pattern = false;     // <- done
+  std::string query_regex_pattern = "";  // <- done
+  bool show_help = false;                // <- done
+  bool show_tests = false;               // <- done
+  bool list_tags = false;                // <- done
+  bool show_successful_tests = false;    // <- done
+  std::string output_filename = "";
+  std::string use_reporter = "console";  // <- done
+  std::string suite_name = "";
+  bool abort_early = false;  // <- done
+  std::size_t abort_after_n_failures =
       std::numeric_limits<std::size_t>::max();  // <- done
-  static inline bool show_duration = false;     // <- done
-  static inline std::size_t show_min_duration = 0;
-  static inline std::string input_filename = "";
-  static inline bool show_test_names = false;  // <- done
-  static inline bool show_reporters = false;   // <- done
-  static inline std::string sort_order = "decl";
-  static inline std::size_t rnd_seed = 0;        // 0: use time
-  static inline std::string use_colour = "yes";  // <- done
-  static inline bool show_lib_identity = false;  // <- done
-  static inline std::string wait_for_keypress = "never";
+  bool show_duration = false;     // <- done
+  std::size_t show_min_duration = 0;
+  std::string input_filename = "";
+  bool show_test_names = false;  // <- done
+  bool show_reporters = false;   // <- done
+  std::string sort_order = "decl";
+  std::size_t rnd_seed = 0;        // 0: use time
+  std::string use_colour = "yes";  // <- done
+  bool show_lib_identity = false;  // <- done
+  std::string wait_for_keypress = "never";
 
-  static inline const std::vector<option> options = {
-      // clang-format off
-  // <short long option name>, <option arg>, <ref to cfg>, <description>
-  {"-? -h --help", "", std::ref(show_help), "display usage information"},
-  {"-l --list-tests", "", std::ref(show_tests), "list all/matching test cases"},
-  {"-t, --list-tags", "", std::ref(list_tags), "list all/matching tags"},
-  {"-s, --success", "", std::ref(show_successful_tests), "include successful tests in output"},
-  {"-o, --out", "<filename>", std::ref(output_filename), "output filename"},
-  {"-r, --reporter", "<name>", std::ref(use_reporter), "reporter to use (defaults to console)"},
-  {"-n, --name", "<name>", std::ref(suite_name), "suite name"},
-  {"-a, --abort", "", std::ref(abort_early), "abort at first failure"},
-  {"-x, --abortx", "<no. failures>", std::ref(abort_after_n_failures), "abort after x failures"},
-  {"-d, --durations", "", std::ref(show_duration), "show test durations"},
-  {"-D, --min-duration", "<seconds>", std::ref(show_min_duration), "show test durations for [...]"},
-  {"-f, --input-file", "<filename>", std::ref(input_filename), "load test names to run from a file"},
-  {"--list-test-names-only", "", std::ref(show_test_names), "list all/matching test cases names only"},
-  {"--list-reporters", "", std::ref(show_reporters), "list all reporters"},
-  {"--order <decl|lex|rand>", "", std::ref(sort_order), "test case order (defaults to decl)"},
-  {"--rng-seed", "<'time'|number>", std::ref(rnd_seed), "set a specific seed for random numbers"},
-  {"--use-colour", "<yes|no>", std::ref(use_colour), "should output be colourised"},
-  {"--libidentify", "", std::ref(show_lib_identity), "report name and version according to libidentify standard"},
-  {"--wait-for-keypress", "<never|start|exit|both>", std::ref(wait_for_keypress), "waits for a keypress before exiting"}
-      // clang-format on
-  };
+  std::vector<option> options;
+  
+  cfg();
+  
+  auto find_arg(std::string_view arg) -> std::optional<cfg::option>;
 
-  static std::optional<cfg::option> find_arg(std::string_view arg) {
-    for (const auto& option : cfg::options) {
-      if (std::get<0>(option).find(arg) != std::string::npos) {
-        return option;
-      }
-    }
-    return std::nullopt;
-  }
+  void print_usage();
 
-  static void print_usage() {
-    std::size_t opt_width = 30;
-    std::cout << cfg::executable_name
-              << " [<test name|pattern|tags> ... ] options\n\nwith options:\n";
-    for (const auto& [cmd, arg, val, description] : cfg::options) {
-      std::string s = cmd;
-      s.append(" ");
-      s.append(arg);
-      // pad fixed column width
-      const auto pad_by = (s.size() <= opt_width) ? opt_width - s.size() : 0;
-      s.insert(s.end(), pad_by, ' ');
-      std::cout << "  " << s << description << std::endl;
-    }
-  }
+  static void print_identity();
 
-  static void print_identity() {
-    // according to: https://github.com/janwilmans/LibIdentify
-    std::cout << "description:    A UT / μt test executable\n";
-    std::cout << "category:       testframework\n";
-    std::cout << "framework:      UT: C++20 μ(micro)/Unit Testing Framework\n";
-    std::cout << "version:        " << BOOST_UT_VERSION << std::endl;
-  }
-
-  static inline void parse(int argc, const char* argv[]) {
-    const std::size_t n_args = static_cast<std::size_t>(argc);
-    if (n_args > 0 && argv != nullptr) {
-      cfg::largc = argc;
-      cfg::largv = argv;
-      executable_name = argv[0];
-    }
-    query_pattern = "";
-    bool found_first_option = false;
-    for (auto i = 1U; i < n_args; i++) {
-      std::string cmd(argv[i]);
-      auto cmd_option = find_arg(cmd);
-      if (!cmd_option.has_value()) {
-        if (found_first_option) {
-          std::cerr << "unknown option: '" << argv[i] << "' run:" << std::endl;
-          std::cerr << "'" << argv[0] << " --help'" << std::endl;
-          std::cerr << "for additional help" << std::endl;
-          std::exit(-1);
-        } else {
-          if (i > 1U) {
-            query_pattern.append(" ");
-          }
-          query_pattern.append(argv[i]);
-        }
-        continue;
-      }
-      found_first_option = true;
-      auto var = std::get<value_ref>(*cmd_option);
-      const bool has_option_arg = !std::get<1>(*cmd_option).empty();
-      if (!has_option_arg &&
-          std::holds_alternative<std::reference_wrapper<bool>>(var)) {
-        std::get<std::reference_wrapper<bool>>(var).get() = true;
-        continue;
-      }
-      if ((i + 1) >= n_args) {
-        std::cerr << "missing argument for option " << argv[i] << std::endl;
-        std::exit(-1);
-      }
-      i += 1;  // skip to next argv for parsing
-      if (std::holds_alternative<std::reference_wrapper<std::size_t>>(var)) {
-        // parse size argument
-        std::size_t last;
-        std::string argument(argv[i]);
-        std::size_t val = std::stoull(argument, &last);
-        if (last != argument.length()) {
-          std::cerr << "cannot parse option of " << argv[i - 1] << " "
-                    << argv[i] << std::endl;
-          std::exit(-1);
-        }
-        std::get<std::reference_wrapper<std::size_t>>(var).get() = val;
-      }
-      if (std::holds_alternative<std::reference_wrapper<std::string>>(var)) {
-        // parse string argument
-        std::get<std::reference_wrapper<std::string>>(var).get() = argv[i];
-        continue;
-      }
-    }
-
-    if (show_help) {
-      print_usage();
-      std::exit(0);
-    }
-
-    if (show_lib_identity) {
-      print_identity();
-      std::exit(0);
-    }
-
-    if (!query_pattern.empty()) {  // simple glob-like search
-      query_regex_pattern = "";
-      for (const char c : query_pattern) {
-        if (c == '!') {
-          invert_query_pattern = true;
-        } else if (c == '*') {
-          query_regex_pattern += ".*";
-        } else if (c == '?') {
-          query_regex_pattern += '.';
-        } else if (c == '.') {
-          query_regex_pattern += "\\.";
-        } else if (c == '\\') {
-          query_regex_pattern += "\\\\";
-        } else {
-          query_regex_pattern += c;
-        }
-      }
-    }
-  }
+  void parse(int argc, const char* argv[]) ;
 };
+auto config() -> cfg &;
 
 template <class T>
 [[nodiscard]] constexpr auto get_impl(const T& t, int) -> decltype(t.get()) {
@@ -1640,17 +1506,19 @@ class reporter_junit {
   std::ostream lcout_;
   TPrinter printer_;
   std::stringstream ss_out_{};
-
+  
   void reset_printer() {
     ss_out_.str("");
     ss_out_.clear();
   }
 
-  void check_for_scope(std::string_view test_name) {
+  void check_for_scope(std::string_view test_name) 
+  {
+    auto & cfg_{ detail::config() };
     const std::string str_name(test_name);
     active_test_.push(str_name);
     const auto [iter, inserted] = active_scope_->nested_tests->try_emplace(
-        str_name, test_result{active_scope_, detail::cfg::executable_name,
+        str_name, test_result{active_scope_, cfg_.executable_name,
                               active_suite_, str_name});
     active_scope_ = &active_scope_->nested_tests->at(str_name);
     if (active_test_.size() == 1) {
@@ -1703,24 +1571,26 @@ class reporter_junit {
   constexpr auto operator=(TPrinter printer) {
     printer_ = static_cast<TPrinter&&>(printer);
   }
-  reporter_junit() : lcout_(std::cout.rdbuf()) {
-    ::boost::ut::detail::cfg::parse(detail::cfg::largc, detail::cfg::largv);
+  reporter_junit() : lcout_(std::cout.rdbuf()) 
+  {
+    auto & cfg_{ detail::config() };
+    cfg_.parse(cfg_.largc, cfg_.largv);
 
-    if (detail::cfg::show_reporters) {
+    if (cfg_.show_reporters) {
       std::cout << "available reporter:\n";
       std::cout << "  console (default)\n";
       std::cout << "  junit" << std::endl;
       std::exit(0);
     }
-    if (detail::cfg::use_reporter.starts_with("junit")) {
+    if (cfg_.use_reporter.starts_with("junit")) {
       report_type_ = JUNIT;
     } else {
       report_type_ = CONSOLE;
     }
-    if (!detail::cfg::use_colour.starts_with("yes")) {
+    if (!cfg_.use_colour.starts_with("yes")) {
       color_ = {"", "", "", ""};
     }
-    if (!detail::cfg::show_tests && !detail::cfg::show_test_names) {
+    if (!cfg_.show_tests && !cfg_.show_test_names) {
       std::cout.rdbuf(ss_out_.rdbuf());
     }
   }
@@ -1759,7 +1629,8 @@ class reporter_junit {
       active_scope_->report_string = ss_out_.str();
       active_scope_->passed += 1LU;
       if (report_type_ == CONSOLE) {
-        if (detail::cfg::show_successful_tests) {
+        auto & cfg_{ detail::config() };
+        if (cfg_.show_successful_tests) {
           if (!active_scope_->nested_tests->empty()) {
             ss_out_ << "\n";
             ss_out_ << std::string(2 * active_test_.size() - 2, ' ');
@@ -1824,8 +1695,9 @@ class reporter_junit {
       lcout_ << '\n';
       lcout_ << active_scope_->report_string << '\n';
     }
-    if (detail::cfg::abort_early ||
-        active_scope_->fails >= detail::cfg::abort_after_n_failures) {
+    auto & cfg_{ detail::config() };
+    if (cfg_.abort_early ||
+        active_scope_->fails >= cfg_.abort_after_n_failures) {
       std::cerr << "early abort for test : " << active_test_.top() << "after ";
       std::cerr << active_scope_->fails << " failures total." << std::endl;
       std::exit(-1);
@@ -1856,8 +1728,9 @@ class reporter_junit {
     if (report_type_ == CONSOLE) {
       lcout_ << active_scope_->report_string << "\n\n";
     }
-    if (detail::cfg::abort_early ||
-        active_scope_->fails >= detail::cfg::abort_after_n_failures) {
+    auto & cfg_{ detail::config() };
+    if (cfg_.abort_early ||
+        active_scope_->fails >= cfg_.abort_after_n_failures) {
       std::cerr << "early abort for test : " << active_test_.top() << "after ";
       std::cerr << active_scope_->fails << " failures total." << std::endl;
       std::exit(-1);
@@ -1870,23 +1743,27 @@ class reporter_junit {
     std::cout.flush();
     std::cout.rdbuf(cout_save);
     std::ofstream maybe_of;
-    if (detail::cfg::output_filename != "") {
-      maybe_of = std::ofstream(detail::cfg::output_filename);
+    auto & cfg_{ detail::config() };
+    
+    if (cfg_.output_filename != "") {
+      maybe_of = std::ofstream(cfg_.output_filename);
     }
 
     if (report_type_ == JUNIT) {
-      print_junit_summary(detail::cfg::output_filename != "" ? maybe_of
+      print_junit_summary(cfg_.output_filename != "" ? maybe_of
                                                              : std::cout);
       return;
     }
     print_console_summary(
-        detail::cfg::output_filename != "" ? maybe_of : std::cout,
-        detail::cfg::output_filename != "" ? maybe_of : std::cerr);
+        cfg_.output_filename != "" ? maybe_of : std::cout,
+        cfg_.output_filename != "" ? maybe_of : std::cerr);
   }
 
  protected:
-  void print_duration(auto& printer) const noexcept {
-    if (detail::cfg::show_duration) {
+  void print_duration(auto& printer) const noexcept 
+  {
+    auto & cfg_{ detail::config() };
+    if (cfg_.show_duration) {
       std::int64_t time_ms =
           std::chrono::duration_cast<std::chrono::milliseconds>(
               active_scope_->run_stop - active_scope_->run_start)
@@ -1942,7 +1819,7 @@ class reporter_junit {
       n_fails += suite_result.fails;
       total_time += suite_time(suite_result);
     }
-
+    auto & cfg_{ detail::config() };
     // mock junit output:
     stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     stream << "<testsuites";
@@ -1954,7 +1831,7 @@ class reporter_junit {
 
     for (const auto& [suite_name, suite_result] : results_) {
       stream << "<testsuite";
-      stream << " classname=\"" << detail::cfg::executable_name << '\"';
+      stream << " classname=\"" << cfg_.executable_name << '\"';
       stream << " name=\"" << suite_name << '\"';
       stream << " tests=\"" << suite_result.assertions << '\"';
       stream << " errors=\"" << suite_result.fails << '\"';
@@ -2072,8 +1949,9 @@ class runner {
   template <class... Ts>
   auto on(events::test<Ts...> test) {
     path_[level_] = test.name;
-
-    if (detail::cfg::list_tags) {
+    auto & cfg_{ detail::config() };
+    
+    if (cfg_.list_tags) {
       std::for_each(test.tag.cbegin(), test.tag.cend(), [](const auto& tag) {
         std::cout << "tag: " << tag << std::endl;
       });
@@ -2082,8 +1960,8 @@ class runner {
 
     auto execute = std::empty(test.tag);
     for (const auto& tag_element : test.tag) {
-      if (utility::is_match(tag_element, "skip") && !detail::cfg::show_tests &&
-          !detail::cfg::show_test_names) {
+      if (utility::is_match(tag_element, "skip") && !cfg_.show_tests &&
+          !cfg_.show_test_names) {
         on(events::skip<>{.type = test.type, .name = test.name});
         return;
       }
@@ -2096,21 +1974,21 @@ class runner {
       }
     }
 
-    if (!detail::cfg::query_pattern.empty()) {
-      const static auto regex = detail::cfg::query_regex_pattern;
+    if (!cfg_.query_pattern.empty()) {
+      const static auto regex = cfg_.query_regex_pattern;
       bool matches = utility::regex_match(test.name.data(), regex.c_str());
       for (const auto& tag2 : test.tag) {
         matches |= utility::regex_match(tag2.data(), regex.c_str());
       }
       if (matches) {
-        execute = !detail::cfg::invert_query_pattern;
+        execute = !cfg_.invert_query_pattern;
       } else {
-        execute = detail::cfg::invert_query_pattern;
+        execute = cfg_.invert_query_pattern;
       }
     }
 
-    if (detail::cfg::show_tests || detail::cfg::show_test_names) {
-      if (!detail::cfg::show_test_names) {
+    if (cfg_.show_tests || cfg_.show_test_names) {
+      if (!cfg_.show_test_names) {
         std::cout << "matching test: ";
       }
       std::cout << test.name << std::endl;
@@ -2254,8 +2132,8 @@ class runner {
 struct override {};
 
 template <class = override, class...>
-//[[maybe_unused]] inline auto cfg = runner<reporter<printer>>{};// alt reporter
-[[maybe_unused]] inline auto cfg = runner<reporter_junit<printer>>{};
+[[maybe_unused]] inline auto cfg = runner<reporter<printer>>{};// alt reporter
+// [[maybe_unused]] inline auto cfg = runner<reporter_junit<printer>>{};
 
 namespace detail {
 struct tag {
@@ -2360,7 +2238,11 @@ struct log {
 template <class TExpr>
 class terse_ {
  public:
-  constexpr explicit terse_(const TExpr& expr) : expr_{expr} { cfg::wip = {}; }
+  constexpr explicit terse_(const TExpr& expr) : expr_{expr} 
+  { 
+    cfg::wip = {}; 
+    
+  }
 
   ~terse_() noexcept(false) {
     if (static auto once = true; once and not cfg::wip) {
@@ -2390,32 +2272,32 @@ struct that_ {
 
     template <class TRhs>
     [[nodiscard]] constexpr auto operator==(const TRhs& rhs) const {
-      return eq_{t_, rhs};
+      return eq_<T,TRhs>{t_, rhs};
     }
 
     template <class TRhs>
     [[nodiscard]] constexpr auto operator!=(const TRhs& rhs) const {
-      return neq_{t_, rhs};
+      return neq_<T,TRhs>{t_, rhs};
     }
 
     template <class TRhs>
     [[nodiscard]] constexpr auto operator>(const TRhs& rhs) const {
-      return gt_{t_, rhs};
+      return gt_<T,TRhs>{t_, rhs};
     }
 
     template <class TRhs>
     [[nodiscard]] constexpr auto operator>=(const TRhs& rhs) const {
-      return ge_{t_, rhs};
+      return ge_<T,TRhs>{t_, rhs};
     }
 
     template <class TRhs>
     [[nodiscard]] constexpr auto operator<(const TRhs& rhs) const {
-      return lt_{t_, rhs};
+      return lt_<T,TRhs>{t_, rhs};
     }
 
     template <class TRhs>
     [[nodiscard]] constexpr auto operator<=(const TRhs& rhs) const {
-      return le_{t_, rhs};
+      return le_<T,TRhs>{t_, rhs};
     }
 
     [[nodiscard]] constexpr operator bool() const {
@@ -3130,131 +3012,6 @@ namespace bdd {
   return detail::test{"then", name};
 };
 
-namespace gherkin {
-class steps {
-  using step_t = std::string;
-  using steps_t = void (*)(steps&);
-  using gherkin_t = std::vector<step_t>;
-  using call_step_t = utility::function<void(const std::string&)>;
-  using call_steps_t = std::vector<std::pair<step_t, call_step_t>>;
-
-  class step {
-   public:
-    template <class TPattern>
-    step(steps& steps, const TPattern& pattern)
-        : steps_{steps}, pattern_{pattern} {}
-
-    ~step() { steps_.next(pattern_); }
-
-    template <class TExpr>
-    auto operator=(const TExpr& expr) -> void {
-      for (const auto& [pattern, _] : steps_.call_steps()) {
-        if (pattern_ == pattern) {
-          return;
-        }
-      }
-
-      steps_.call_steps().emplace_back(
-          pattern_, [expr, pattern = pattern_](const auto& _step) {
-            [=]<class... TArgs>(type_traits::list<TArgs...>) {
-              log << _step;
-              auto i = 0u;
-              const auto& ms = utility::match(pattern, _step);
-              expr(lexical_cast<TArgs>(ms[i++])...);
-            }(typename type_traits::function_traits<TExpr>::args{});
-          });
-    }
-
-   private:
-    template <class T>
-    static auto lexical_cast(const std::string& str) {
-      T t{};
-      std::istringstream iss{};
-      iss.str(str);
-      if constexpr (std::is_same_v<T, std::string>) {
-        t = iss.str();
-      } else {
-        iss >> t;
-      }
-      return t;
-    }
-
-    steps& steps_;
-    std::string pattern_{};
-  };
-
- public:
-  template <class TSteps>
-  constexpr /*explicit(false)*/ steps(const TSteps& _steps) : steps_{_steps} {}
-
-  template <class TGherkin>
-  auto operator|(const TGherkin& gherkin) {
-    gherkin_ = utility::split<std::string>(gherkin, '\n');
-    for (auto& _step : gherkin_) {
-      _step.erase(0, _step.find_first_not_of(" \t"));
-    }
-
-    return [this] {
-      step_ = {};
-      steps_(*this);
-    };
-  }
-  auto feature(const std::string& pattern) {
-    return step{*this, "Feature: " + pattern};
-  }
-  auto scenario(const std::string& pattern) {
-    return step{*this, "Scenario: " + pattern};
-  }
-  auto given(const std::string& pattern) {
-    return step{*this, "Given " + pattern};
-  }
-  auto when(const std::string& pattern) {
-    return step{*this, "When " + pattern};
-  }
-  auto then(const std::string& pattern) {
-    return step{*this, "Then " + pattern};
-  }
-
- private:
-  template <class TPattern>
-  auto next(const TPattern& pattern) -> void {
-    const auto is_scenario = [&pattern](const auto& _step) {
-      constexpr auto scenario = "Scenario";
-      return pattern.find(scenario) == std::string::npos and
-             _step.find(scenario) != std::string::npos;
-    };
-
-    const auto call_steps = [this, is_scenario](const auto& _step,
-                                                const auto i) {
-      for (const auto& [name, call] : call_steps_) {
-        if (is_scenario(_step)) {
-          break;
-        }
-
-        if (utility::is_match(_step, name) or
-            not std::empty(utility::match(name, _step))) {
-          step_ = i;
-          call(_step);
-        }
-      }
-    };
-
-    decltype(step_) i{};
-    for (const auto& _step : gherkin_) {
-      if (i++ == step_) {
-        call_steps(_step, i);
-      }
-    }
-  }
-
-  auto call_steps() -> call_steps_t& { return call_steps_; }
-
-  steps_t steps_{};
-  gherkin_t gherkin_{};
-  call_steps_t call_steps_{};
-  decltype(sizeof("")) step_{};
-};
-}  // namespace gherkin
 }  // namespace bdd
 
 namespace spec {
@@ -3323,3 +3080,4 @@ __attribute__((constructor(101))) inline void cmd_line_args(
 #endif
 
 #endif
+

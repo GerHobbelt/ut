@@ -27,7 +27,7 @@ option(BOOST_UT_BUILD_BENCHMARKS "Build the benchmarks" OFF)
 option(BOOST_UT_BUILD_EXAMPLES "Build the examples" ${PROJECT_IS_TOP_LEVEL})
 option(BOOST_UT_BUILD_TESTS "Build the tests" ${PROJECT_IS_TOP_LEVEL})
 option(BOOST_UT_USE_WARNINGS_AS_ERORS "Build the tests" ${PROJECT_IS_TOP_LEVEL})
-option(BOOST_UT_DISABLE_MODULE "Disable ut module" OFF)
+option(BOOST_UT_DISABLE_MODULE "Disable ut module" ON)
 option(BOOST_UT_ALLOW_CPM_USE "Do not reach out across network for CPM" ON)
 
 if(NOT CMAKE_SKIP_INSTALL_RULES)
@@ -48,7 +48,8 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
   endif()
 endif()
 
-add_library(ut INTERFACE)
+add_library(ut)
+target_sources(ut PRIVATE source/ut.cc)
 
 if(BOOST_UT_ALLOW_CPM_USE AND PROJECT_IS_TOP_LEVEL)
 add_library(Boost::ut ALIAS ut)
@@ -57,9 +58,25 @@ endif()
 if(NOT DEFINED INCLUDE_INSTALL_DIR)
   set(INCLUDE_INSTALL_DIR include/${PROJECT_NAME}-${PROJECT_VERSION}/include)
 endif()
-target_include_directories(ut INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>)
-target_compile_features(ut INTERFACE cxx_std_20)
+target_include_directories(ut PUBLIC 
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
+      )
+target_compile_features(ut PUBLIC cxx_std_20)
+set(LIB_INSTALL_DIR lib)
+set(BIN_INSTALL_DIR bin)
 
+install(TARGETS ${PROJECT_NAME}
+        # EXPORT ${PROJECT_NAME}Targets
+        LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+        RUNTIME DESTINATION ${BIN_INSTALL_DIR})
+        
+install(EXPORT ${PROJECT_NAME}Targets
+        FILE ${PROJECT_NAME}Targets.cmake
+        NAMESPACE ${NAMESPACE}::
+        DESTINATION ${LIB_INSTALL_DIR}/cmake/${PROJECT_NAME})
+        
 if(BOOST_UT_USE_WARNINGS_AS_ERORS)
   include(cmake/WarningsAsErrors.cmake)
 endif()
@@ -80,7 +97,7 @@ if(BOOST_UT_ENABLE_SANITIZERS)
 endif()
 
 if(BOOST_UT_DISABLE_MODULE)
-  target_compile_definitions(ut INTERFACE BOOST_UT_DISABLE_MODULE)
+  target_compile_definitions(ut PUBLIC BOOST_UT_DISABLE_MODULE)
 endif()
 
 if(NOT CMAKE_SKIP_INSTALL_RULES)
