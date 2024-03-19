@@ -1,5 +1,6 @@
 #include <boost/ut.hpp>
 #include <boost/gherkin/gherkin.hpp>
+#include <boost/reporter_junit.hpp>
 
 namespace boost::inline ext::ut::inline v2_0_1::detail
   {
