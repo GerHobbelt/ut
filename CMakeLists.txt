@@ -4,7 +4,7 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-cmake_minimum_required(VERSION 3.21...3.25)
+cmake_minimum_required(VERSION 3.21)
 project(
   ut
   VERSION 2.0.1
@@ -35,7 +35,7 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
     # ---- Add dependencies via CPM ----
     # see https://github.com/cpm-cmake/CPM.cmake for more info
 
-    include(cmake/CPM.cmake)
+    include(cmake/get_cpm.cmake)
 
     # PackageProject.cmake will be used to make our target installable
     CPMAddPackage(

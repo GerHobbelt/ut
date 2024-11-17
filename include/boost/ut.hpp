@@ -1243,7 +1243,7 @@ class printer {
   printer() = default;
   /*explicit(false)*/ printer(const colors colors) : colors_{colors} {}
 
-  template <class T>
+  template <concepts::stream_insertable T>
   auto& operator<<(const T& t) {
     out_ << detail::get(t);
     return *this;
@@ -2111,12 +2111,12 @@ constexpr auto operator""_b(const char* name, decltype(sizeof("")) size) {
 namespace operators {
 [[nodiscard]] constexpr auto operator==(std::string_view lhs,
                                         std::string_view rhs) {
-  return detail::eq_{lhs, rhs};
+  return detail::eq_<std::string_view,std::string_view>{lhs, rhs};
 }
 
 [[nodiscard]] constexpr auto operator!=(std::string_view lhs,
                                         std::string_view rhs) {
-  return detail::neq_{lhs, rhs};
+  return detail::neq_<std::string_view,std::string_view>{lhs, rhs};
 }
 
 template <std::ranges::range T>
