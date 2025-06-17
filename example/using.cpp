@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_using_main
+#endif
+
+extern "C"
+int main(void) {
   using boost::ut::operator""_test;
   using boost::ut::operator""_i;
 
@@ -24,4 +30,6 @@ int main() {
     using boost::ut::that;
     expect(that % 1 == 1 and that % 2 == 2);
   };
+
+  return 0;
 }

@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_should_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   auto i = 0;
@@ -17,4 +23,6 @@ int main() {
   should("return decreased number for --") = [i]() mutable {
     expect(--i == -1_i);
   };
+
+  return 0;
 }

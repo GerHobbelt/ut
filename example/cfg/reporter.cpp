@@ -33,7 +33,13 @@ class reporter {
 template <>
 auto ut::cfg<ut::override> = ut::runner<cfg::reporter>{};
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_cfg_reporter_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace ut;
   using namespace std::literals::string_view_literals;
 
@@ -41,4 +47,6 @@ int main() {
     expect(42 == 42_i);
     expect("ut"sv != "tu"sv);
   };
+
+  return 0;
 }

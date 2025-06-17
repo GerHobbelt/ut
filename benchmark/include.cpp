@@ -7,4 +7,11 @@
 //
 #include <boost/ut.hpp>
 
-int main() {}
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_benchmark_include_main
+#endif
+
+extern "C" int main(void) {
+  return 0;
+}

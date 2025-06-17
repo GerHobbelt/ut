@@ -7,4 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() { boost::ut::expect(true); }
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_minimal_main
+#endif
+
+extern "C" int main(void) {
+  boost::ut::expect(true);
+
+  return 0;
+}

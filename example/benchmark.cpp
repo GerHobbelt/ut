@@ -50,7 +50,13 @@ void do_not_optimize(T&& t) {
 #endif
 }  // namespace benchmark
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_benchmark_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
   using namespace benchmark;
 
@@ -58,4 +64,6 @@ int main() {
     std::string created_string{"hello"};
     do_not_optimize(created_string);
   };
+
+  return 0;
 }

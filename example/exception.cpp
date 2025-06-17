@@ -8,7 +8,13 @@
 #include <boost/ut.hpp>
 #include <stdexcept>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_exception_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "exceptions"_test = [] {
@@ -18,4 +24,6 @@ int main() {
     expect(throws([] { throw 0; })) << "throws any exception";
     expect(nothrow([] {})) << "doesn't throw";
   };
+
+  return 0;
 }

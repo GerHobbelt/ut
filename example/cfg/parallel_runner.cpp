@@ -62,4 +62,12 @@ ut::suite parallel_2 = [] {
   "test.2.3"_test = [] { expect(3_i == 3); };
 };
 
-int main() { return ut::cfg<ut::override>.run(); }
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_cfg_parallel_runner_main
+#endif
+
+extern "C"
+int main(void) {
+  return ut::cfg<ut::override>.run();
+}

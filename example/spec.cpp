@@ -9,7 +9,13 @@
 
 constexpr auto sum = [](auto... args) { return (0 + ... + args); };
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_spec_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut::operators::terse;
   using namespace boost::ut::literals;
   using namespace boost::ut::spec;
@@ -18,4 +24,6 @@ int main() {
     it("should be 0") = [] { sum() == 0_i; };
     it("should add all args") = [] { sum(1, 2, 3) == 6_i; };
   };
+
+  return 0;
 }

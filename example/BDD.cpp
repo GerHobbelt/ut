@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_BDD_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut::literals;
   using namespace boost::ut::operators::terse;
   using namespace boost::ut::bdd;
@@ -42,4 +48,6 @@ int main() {
     then("I expect number to be 42");
       42_i == number;
   // clang-format on
+
+      return 0;
 }

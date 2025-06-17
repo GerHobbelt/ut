@@ -14,7 +14,14 @@
 constexpr auto sum = [](auto... args) { return (0 + ... + args); };
 
 struct dummy_struct {};
-int main() {
+
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_expect_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "operators"_test = [] {
@@ -120,4 +127,6 @@ int main() {
     expect((not "true"_b) != "true"_b);
     expect("has value"_b == "value is set"_b);
   };
+
+  return 0;
 }

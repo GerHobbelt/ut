@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_tag_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   cfg<override> = {.filter = "tag", .tag = {"execute"}};
@@ -32,4 +38,6 @@ int main() {
     expect(42_i == 42);
   };
   // clang-format on
+
+  return 0;
 }

@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_benchmark_test_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "1"_test = [] {};
@@ -1010,4 +1016,6 @@ int main() {
   "998"_test = [] {};
   "999"_test = [] {};
   "1000"_test = [] {};
+
+  return 0;
 }

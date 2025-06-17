@@ -9,7 +9,13 @@
 #include <optional>
 #include <vector>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_fatal_main
+#endif
+
+extern "C"
+int main(void) {
   using boost::ut::operator""_test;
   using namespace boost::ut::literals;
   using boost::ut::fatal;
@@ -55,4 +61,6 @@ int main() {
   std::vector v{1u};
   expect(fatal(std::size(v) == 1_ul)) << "fatal assertion";
   expect(v[0] == 1_u);
+
+  return 0;
 }

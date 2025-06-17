@@ -33,11 +33,19 @@ class runner {
 template <>
 auto ut::cfg<ut::override> = cfg::runner{};
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_cfg_runner_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace ut;
 
   "should be ignored"_test = [] {
     expect(throws([] { throw std::runtime_error{"exception!"}; }));
     expect(1_i == 2) << "doesn't fire";
   };
+
+  return 0;
 }

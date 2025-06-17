@@ -5,9 +5,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
+#if not defined(_MSC_VER)
+
 import boost.ut;
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_module_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "module"_test = [] {
@@ -16,4 +24,8 @@ int main() {
     // clang-format on
     expect(std::vector{1, 2, 3} == std::vector{1, 2, 3});
   };
+
+  return 0;
 }
+
+#endif

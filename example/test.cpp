@@ -7,10 +7,18 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_test_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "UDL syntax"_test = [] { expect(42_i == 42); };
 
   test("function syntax") = [] { expect(42_i == 42); };
+
+  return 0;
 }

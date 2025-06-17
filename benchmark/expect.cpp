@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_benchmark_expect_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   static constexpr auto iterations = 1'000'000;
@@ -31,4 +37,6 @@ int main() {
     }
   };
 #endif
+
+  return 0;
 }

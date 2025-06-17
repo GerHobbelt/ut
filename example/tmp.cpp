@@ -10,7 +10,13 @@
 template <class...>
 struct list {};
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_tmp_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   static constexpr auto i = 42;
@@ -42,4 +48,6 @@ int main() {
     expect(not[](auto t) { return requires { t.value; }; }(bar{}));
   };
 #endif
+
+  return 0;
 }

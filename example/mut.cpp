@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_mut_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   auto i = 0;  // mutable
@@ -25,4 +31,6 @@ int main() {
       expect(i == -1_i);         // immutable
     };
   };
+
+  return 0;
 }

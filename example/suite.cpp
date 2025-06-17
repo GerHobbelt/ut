@@ -37,4 +37,12 @@ struct calc {
 };
 #endif
 
-int main() {}
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_suite_main
+#endif
+
+extern "C"
+int main(void) {
+  return 0;
+}

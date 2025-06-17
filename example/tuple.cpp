@@ -7,7 +7,7 @@
 #include <string>
 #include <tuple>
 
-void test_optional() {
+static void test_optional(void) {
   using namespace boost::ut;
 
   std::cout << std::boolalpha;
@@ -82,7 +82,13 @@ std::tuple<int, int> divide(int a, int b) {
 
 }  // namespace
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_optional_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   const auto student0 = get_student(0);
@@ -175,4 +181,6 @@ int main() {
   }
 
   test_optional();
+
+  return 0;
 }

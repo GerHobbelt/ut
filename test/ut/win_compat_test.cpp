@@ -25,7 +25,15 @@
 
 namespace ut = boost::ut;
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main     boost_ut_test_win_compat_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace ut;
   expect(true);
+
+  return 0;
 }

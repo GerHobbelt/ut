@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_filter_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   cfg<override> = {.filter = "run.sub1"};
@@ -18,4 +24,6 @@ int main() {
   };
 
   "don't run"_test = [] { expect(0 == 1_i) << "don't run"; };
+
+  return 0;
 }

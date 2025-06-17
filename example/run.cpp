@@ -17,6 +17,12 @@ ut::suite _ = [] {
   };
 };
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_run_main
+#endif
+
+extern "C"
 int main(int argc, const char** argv) {
   // explicitly run registered test suites and manually pass argc/argv
   return ut::cfg<>.run({.argc = argc, .argv = argv});

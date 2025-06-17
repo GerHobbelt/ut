@@ -48,7 +48,13 @@ class any_of {
   std::tuple<Ts...> ts_;
 };
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_matcher_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
   using namespace std::literals::string_view_literals;
 
@@ -76,4 +82,6 @@ int main() {
     expect(ends_with(str, ".test"sv));
     expect(any_of{1, 2, 3} == 2 or any_of{42, 43} == 44);
   };
+
+  return 0;
 }

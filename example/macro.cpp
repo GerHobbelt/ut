@@ -11,7 +11,7 @@
 #define EXPECT(...)            \
   using namespace ::boost::ut; \
   ::boost::ut::expect(::boost::ut::that % __VA_ARGS__)
-#define SUITE ::boost::ut::suite _ = []
+#define SUITE ::boost::ut::suite _ ## __COUNTER__ = []
 #define TEST(name) ::boost::ut::detail::test{"test", name} = [=]() mutable
 #define TEST_P(name, ...)                 \
   using namespace ::boost::ut::operators; \
@@ -26,7 +26,12 @@ SUITE {
   | std::vector{1, 2, 3};
 };
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_macro_main
+#endif
+
+extern "C" int main(void) {
   TEST("macro") { EXPECT(1 != 2); };
 
   TEST("vector") {
@@ -39,4 +44,6 @@ int main() {
       EXPECT(10u == std::size(v));
     };
   };
+
+  return 0;
 }

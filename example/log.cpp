@@ -12,7 +12,13 @@
 #include <string>
 #endif
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_log_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "log"_test = [] {
@@ -40,4 +46,6 @@ int main() {
     boost::ut::log("\npost\n");
   };
 #endif
+
+  return 0;
 }

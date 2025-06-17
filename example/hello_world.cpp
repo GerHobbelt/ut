@@ -9,7 +9,13 @@
 
 constexpr auto sum = [](auto... args) { return (0 + ... + args); };
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_hello_world_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "hello world"_test = [] {
@@ -17,4 +23,6 @@ int main() {
     expect(1_i == sum(1));
     expect(3_i == sum(1, 2));
   };
+
+  return 0;
 }

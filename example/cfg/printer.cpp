@@ -24,7 +24,14 @@ struct printer : ut::printer {
 template <>
 auto ut::cfg<ut::override> = ut::runner<ut::reporter<cfg::printer>>{};
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_cfg_printer_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace ut;
   "printer"_test = [] {};
+  return 0;
 }

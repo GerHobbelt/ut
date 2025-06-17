@@ -15,7 +15,12 @@ ut::suite basic = [] {
   should("equal") = [] { expect(42_i == 42); };
 };
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_run_report_main
+#endif
+
+extern "C" int main(void) {
   const auto result = ut::cfg<>.run(
       {.report_errors =
            true});  // explicitly run registered test suites and report errors

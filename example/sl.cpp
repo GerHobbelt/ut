@@ -7,7 +7,13 @@
 //
 #include <boost/ut.hpp>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_sl_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
 #if defined(_MSC_VER) and not defined(__clang__)
@@ -30,4 +36,6 @@ int main() {
     verify(boost::ut::reflection::source_location::current(), 42_i);
   };
 #endif
+
+  return 0;
 }

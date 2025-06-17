@@ -10,7 +10,13 @@
 #include <string_view>
 #include <vector>
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_section_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   "[vector]"_test = [] {
@@ -53,4 +59,6 @@ int main() {
       expect(str.str() == "2"sv);
     };
   }
+
+  return 0;
 }

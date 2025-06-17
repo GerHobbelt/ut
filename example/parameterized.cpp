@@ -28,7 +28,13 @@ std::string format_test_parameter(const std::complex<F>& arg,
 
 }  // namespace boost::inline ext::ut
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_parameterized_main
+#endif
+
+extern "C"
+int main(void) {
   using namespace boost::ut;
 
   /// Language syntax
@@ -89,4 +95,6 @@ int main() {
   "parameterized test names"_test = []<class TArg>([[maybe_unused]] TArg arg) {
     expect(true);
   } | std::tuple{42, true, std::complex{1.5, 2.0}};
+
+  return 0;
 }

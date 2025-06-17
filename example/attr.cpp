@@ -9,7 +9,13 @@
 
 constexpr auto sum = [](auto... args) { return (0 + ... + args); };
 
-int main() {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_attr_main
+#endif
+
+extern "C"
+int main(void) {
   using boost::ut::operator""_test;
   using namespace boost::ut::literals;
   using namespace boost::ut::operators::terse;
@@ -27,4 +33,6 @@ int main() {
     [[expect]] (sum(1, 2) == 3_i);
   };
 #endif
+
+  return 0;
 }

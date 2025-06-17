@@ -29,6 +29,12 @@ class calculator {
   T result_{};
 };
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_gherkin_main
+#endif
+
+extern "C"
 int main(int argc, const char** argv) {
   using namespace boost::ut;
 
@@ -78,4 +84,6 @@ int main(int argc, const char** argv) {
 
     "Calculator"_test = steps | file(argv[1]);
   }
+
+  return 0;
 }

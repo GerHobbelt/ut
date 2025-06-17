@@ -396,7 +396,13 @@ DEFINE_NON_INSTANTIABLE_TYPE(non_instantiable_D, true);
 
 #undef DEFINE_NON_INSTANTIABLE_TYPE
 
-int main() {  // NOLINT(readability-function-size)
+
+#if defined(BUILD_MONOLITHIC)
+#define main     boost_ut_test_ut_main
+#endif
+
+extern "C"
+int main(void) {  // NOLINT(readability-function-size)
   {
     using namespace ut;
     using namespace std::literals::string_view_literals;
@@ -2000,7 +2006,7 @@ int main() {  // NOLINT(readability-function-size)
     test_assert("fatal"sv == std::any_cast<const char*>(test_cfg.log_calls[1]));
   }
 
-#if not defined(_MSC_VER)
+#if !defined(_MSC_VER) || _MSC_VER >= 1944
   {
     using namespace ut;
     auto& test_cfg = ut::cfg<ut::override>;
@@ -2120,4 +2126,6 @@ int main() {  // NOLINT(readability-function-size)
     test_assert(test_cfg.assertion_calls[1].result);
   }
 #endif
+
+  return 0;
 }

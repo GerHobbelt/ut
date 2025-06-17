@@ -7,7 +7,14 @@
 //
 #include <boost/ut.hpp>
 
-auto main(int argc, const char** argv) -> int {
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_auto_main
+#endif
+
+// auto main(int argc, const char** argv) -> int { ... }     --> cannot overload functions by return type alone.
+extern "C"
+int main(int argc, const char** argv) {
   using namespace boost::ut;
   expect((argc == 2_i) >> fatal) << "Not enough parameters!";
   cfg<override> = {.filter = argv[1]};

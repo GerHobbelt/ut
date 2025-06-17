@@ -7,6 +7,12 @@
 //
 #include <boost/ut.hpp>
 
+
+#if defined(BUILD_MONOLITHIC)
+#define main boost_ut_example_cli_main
+#endif
+
+extern "C"
 int main(int argc, const char** argv) {
   using namespace boost::ut;
 
@@ -20,4 +26,6 @@ int main(int argc, const char** argv) {
     "pass"_test = [] { expect(42 == 42_i); };
     "fail"_test = [] { expect(0 == 42_i); };
   };
+
+  return 0;
 }
