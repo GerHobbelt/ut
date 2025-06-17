@@ -5,11 +5,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-#include <boost/ut.hpp>
 #undef NDEBUG
+#include <boost/ut.hpp>
 #include <cassert>
 
-int main() {
+int main(void) {
   using namespace boost::ut;
 
   "abort"_test = [] {
